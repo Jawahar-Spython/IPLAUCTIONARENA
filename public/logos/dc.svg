@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="dc-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00488F"/>
+      <stop offset="100%" stop-color="#E42528"/>
+    </linearGradient>
+  </defs>
+  <path d="M100 15 L180 55 L180 145 L100 185 L20 145 L20 55 Z" fill="url(#dc-grad)" stroke="#FFFFFF" stroke-width="6"/>
+  <polygon points="100,40 135,110 65,110" fill="#FFFFFF"/>
+  <text x="100" y="155" font-family="Impact, sans-serif" font-size="36" font-weight="bold" fill="#FFFFFF" text-anchor="middle">DC</text>
+</svg>

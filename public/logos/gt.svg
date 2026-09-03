@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B2133"/>
+      <stop offset="100%" stop-color="#0F1420"/>
+    </linearGradient>
+  </defs>
+  <polygon points="100,10 185,60 185,140 100,190 15,140 15,60" fill="url(#gt-grad)" stroke="#E3B139" stroke-width="6"/>
+  <polygon points="110,35 70,105 105,105 90,165 135,95 100,95" fill="#E3B139"/>
+  <text x="100" y="180" font-family="Impact, sans-serif" font-size="30" font-weight="bold" fill="#FFFFFF" text-anchor="middle">GT</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="srh-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F26522"/>
+      <stop offset="100%" stop-color="#B33E00"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="88" fill="url(#srh-grad)" stroke="#000000" stroke-width="8"/>
+  <path d="M40 120 Q 100 40 160 120 Z" fill="#FFC20E"/>
+  <text x="100" y="145" font-family="Impact, sans-serif" font-size="34" font-weight="bold" fill="#000000" text-anchor="middle">SRH</text>
+</svg>
