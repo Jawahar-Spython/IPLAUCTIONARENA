@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuction } from '../context/AuctionContext';
 import { Gavel, DollarSign, RefreshCw, Download, ArrowUpRight, Search, AlertOctagon, Shield, Layers } from 'lucide-react';
-import { CATEGORY_ROUNDS } from '../data/teams';
+import { CATEGORY_ROUNDS, getTeamLogo } from '../data/teams';
 
 export const AuctioneerDashboard = ({ onNavigateToStage }) => {
   const {
@@ -213,18 +213,13 @@ export const AuctioneerDashboard = ({ onNavigateToStage }) => {
               className="bg-slate-900/90 border border-slate-800 hover:border-amber-500/40 rounded-xl p-3 flex items-center justify-between gap-2 transition-all"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <img
-                  src={p.photoUrl}
-                  alt={p.name}
-                  className="w-10 h-10 rounded-lg object-cover bg-slate-800 border border-slate-700 shrink-0"
-                  onError={(e) => {
-                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=0F172A&color=F59E0B`;
-                  }}
-                />
+                <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 p-1">
+                  <img src={getTeamLogo(p.originalTeam)} alt={p.originalTeam} className="w-full h-full object-contain" />
+                </div>
                 <div className="min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate">{p.name}</h4>
-                  <span className="text-[10px] text-amber-400 block">{p.role}</span>
-                  <span className="text-[10px] text-slate-400 font-mono">₹{p.basePrice} Cr</span>
+                  <h4 className="text-xs font-bold text-white truncate" title={p.name}>{p.name}</h4>
+                  <span className="text-[10px] text-amber-400 block font-medium">{p.role} • {p.originalTeam}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">Base: ₹{p.basePrice} Cr</span>
                 </div>
               </div>
 

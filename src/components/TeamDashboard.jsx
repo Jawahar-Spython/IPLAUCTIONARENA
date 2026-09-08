@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuction } from '../context/AuctionContext';
-import { REQUIRED_SQUAD_COMPOSITION, TOTAL_SQUAD_SIZE } from '../data/teams';
+import { REQUIRED_SQUAD_COMPOSITION, TOTAL_SQUAD_SIZE, getTeamLogo } from '../data/teams';
 import { Shield, CheckCircle, User, DollarSign, Star } from 'lucide-react';
 
 export const TeamDashboard = ({ selectedTeamId, setSelectedTeamId }) => {
@@ -202,26 +202,29 @@ export const TeamDashboard = ({ selectedTeamId, setSelectedTeamId }) => {
               return (
                 <div
                   key={p.id}
-                  className="bg-slate-900 border border-amber-500/30 rounded-2xl p-4 space-y-3 relative group hover:border-amber-400 transition-all shadow-lg"
+                  className="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-2.5 relative group hover:border-amber-400 transition-all shadow-lg flex flex-col justify-between"
                 >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={p.photoUrl}
-                      alt={p.name}
-                      className="w-12 h-14 rounded-lg object-cover object-top border border-amber-500/40 bg-slate-800"
-                      onError={(e) => {
-                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=0F172A&color=F59E0B`;
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-white truncate">{p.name}</h4>
-                      <span className="text-[10px] text-amber-400 block font-semibold">{p.role}</span>
-                      <span className="text-[10px] text-slate-400 block">{p.battingStyle}</span>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 truncate">
+                        {p.role}
+                      </span>
+                      <div className="flex items-center gap-1 shrink-0" title={`Previous Franchise: ${p.originalTeam}`}>
+                        <img src={getTeamLogo(p.originalTeam)} alt={p.originalTeam} className="w-3.5 h-3.5 object-contain" />
+                        <span className="text-[9px] font-bold text-slate-400 font-mono">{p.originalTeam}</span>
+                      </div>
+                    </div>
+
+                    <h4 className="text-xs font-bold text-white truncate pt-0.5" title={p.name}>{p.name}</h4>
+                    
+                    <div className="text-[10px] text-slate-400 space-y-0.5 font-mono">
+                      <div>Bat: <span className="text-slate-200 font-semibold">{p.battingStyle}</span></div>
+                      <div className="truncate" title={p.bowlingStyle}>Bowl: <span className="text-slate-200 font-semibold">{p.bowlingStyle}</span></div>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-slate-400">Price:</span>
+                    <span className="text-slate-400">Sold:</span>
                     <span className="font-bold text-amber-400">₹{p.soldPrice?.toFixed(2)} Cr</span>
                   </div>
                 </div>

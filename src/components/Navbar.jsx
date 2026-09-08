@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuction } from '../context/AuctionContext';
-import { Gavel, Volume2, VolumeX, Shield, Tv, DollarSign, Users, BookOpen, Search, Edit3, Check } from 'lucide-react';
+import { Gavel, Volume2, VolumeX, Shield, Tv, DollarSign, Users, BookOpen, Search, Edit3, Check, Database } from 'lucide-react';
+import { FirebaseAdminSyncModal } from './FirebaseAdminSyncModal';
 
 export const Navbar = ({ activeTab, setActiveTab }) => {
   const { bankAccountTotal, tagline, setTagline, soundEnabled, setSoundEnabled } = useAuction();
@@ -23,6 +24,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     { id: 'rules', label: 'Rules & Engine', icon: BookOpen },
   ];
 
+  const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 bg-[#0B0F19]/95 backdrop-blur-md border-b border-amber-500/20 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,7 +45,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   IPL AUCTION ARENA
                 </h1>
                 <span className="px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-md">
-                  COLLEGE LEAGUE
+                  ADMIN PANEL
                 </span>
               </div>
 
@@ -91,6 +94,16 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               </div>
             </div>
 
+            {/* Firebase Live Sync Button */}
+            <button
+              onClick={() => setIsFirebaseModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 text-xs font-bold transition-all"
+              title="Firebase Live Broadcast Settings"
+            >
+              <Database className="w-4 h-4" />
+              <span className="hidden sm:inline">Firebase Sync</span>
+            </button>
+
             {/* Audio Toggle */}
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
@@ -129,6 +142,11 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           })}
         </nav>
       </div>
+
+      <FirebaseAdminSyncModal 
+        isOpen={isFirebaseModalOpen}
+        onClose={() => setIsFirebaseModalOpen(false)}
+      />
     </header>
   );
 };

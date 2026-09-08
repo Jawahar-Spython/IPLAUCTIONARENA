@@ -4,7 +4,7 @@ export const IPL_TEAMS = [
     name: "Chennai Super Kings",
     shortName: "CSK",
     city: "Chennai",
-    logo: "/logos/csk.svg",
+    logo: "/logos/csk.png",
     primaryColor: "#FCCA06",
     secondaryColor: "#00519E",
     accentColor: "amber",
@@ -177,3 +177,9 @@ export const CATEGORY_ROUNDS = [
   "Round 4: All-rounders",
   "Round 5: Unsold Return",
 ];
+
+export const getTeamLogo = (teamId) => {
+  const team = IPL_TEAMS.find((t) => t.id === teamId);
+  return team ? team.logo : `/logos/${teamId?.toLowerCase()}.png`;
+};
+

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuction } from '../context/AuctionContext';
 import { Gavel, AlertCircle, Sparkles, Trophy, CheckCircle, ArrowRight, Shuffle, Star, Layers } from 'lucide-react';
-import { CATEGORY_ROUNDS } from '../data/teams';
+import { CATEGORY_ROUNDS, getTeamLogo } from '../data/teams';
+import { PlayerPresentationSlide } from './PlayerPresentationSlide';
 
 export const LiveAuctionStage = ({ onSelectTeam }) => {
   const {
@@ -160,135 +161,38 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
       {/* Main Live Stage Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left 7 Columns: Active Stage Player */}
+        {/* Left 7 Columns: Active Stage Player Slide */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="stadium-card-gold rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
-            
-            {/* Stage Background Glow */}
-            <div className="absolute -top-24 -left-24 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+          <PlayerPresentationSlide 
+            player={stagePlayer}
+            teams={teams}
+            currentBid={currentBid}
+          />
 
-            {/* Stage Header Badges */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-500 text-black shadow-lg shadow-amber-500/30 tracking-wider uppercase">
-                  <Sparkles className="w-3.5 h-3.5 fill-black" /> ON THE AUCTION STAGE
-                </span>
-              </div>
+          {/* Stage Action Buttons: SOLD / UNSOLD */}
+              <div className="mt-6 pt-6 border-t border-slate-800 flex flex-wrap sm:flex-nowrap gap-3">
+                <button
+                  onClick={handleSell}
+                  disabled={!currentBid.teamId}
+                  className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-base uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 transition-all ${
+                    currentBid.teamId
+                      ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black hover:scale-[1.02] shadow-amber-500/25 active:scale-[0.98]'
+                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  }`}
+                >
+                  <Gavel className="w-5 h-5 -rotate-12" />
+                  <span>SOLD (HAMMER DOWN)</span>
+                </button>
 
-              {/* Franchise Logo Badge */}
-              <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-1">
-                <img
-                  src={`/logos/${stagePlayer.originalTeam.toLowerCase()}.svg`}
-                  alt={stagePlayer.originalTeam}
-                  className="w-5 h-5 object-contain"
-                />
-                <span className="text-xs font-mono font-bold text-slate-200">
-                  {stagePlayer.originalTeam}
-                </span>
-              </div>
-            </div>
-
-            {/* Player Card Details */}
-            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-              
-              {/* Photo Avatar */}
-              <div className="relative group shrink-0">
-                <div className="w-40 h-48 sm:w-48 sm:h-56 rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-xl bg-slate-900 flex items-center justify-center">
-                  <img
-                    src={stagePlayer.photoUrl}
-                    alt={stagePlayer.name}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(stagePlayer.name)}&background=0F172A&color=F59E0B&size=256&bold=true`;
-                    }}
-                  />
-                </div>
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-[11px] font-black uppercase px-3 py-0.5 rounded-full shadow-md whitespace-nowrap">
-                  BASE: ₹{stagePlayer.basePrice} CR
-                </div>
-              </div>
-
-              {/* Verified Player Attributes */}
-              <div className="flex-1 space-y-4 text-center sm:text-left">
-                <div>
-                  <h2 className="text-3xl sm:text-4xl font-black text-white font-display tracking-wide">
-                    {stagePlayer.name}
-                  </h2>
-                  <p className="text-sm font-semibold text-amber-400 mt-1">
-                    {stagePlayer.role} • {stagePlayer.nationality}
-                  </p>
-                </div>
-
-                {/* Exact Verified Cricket Specs */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Batting Hand</span>
-                    <span className="font-bold text-slate-100">{stagePlayer.battingStyle}</span>
-                  </div>
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Bowling Style</span>
-                    <span className="font-bold text-slate-100 truncate block" title={stagePlayer.bowlingStyle}>
-                      {stagePlayer.bowlingStyle}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Current Leading Bid Display */}
-                <div className="bg-gradient-to-r from-amber-950/60 via-slate-900 to-slate-900 border border-amber-500/40 rounded-2xl p-4 shadow-inner">
-                  <span className="text-xs uppercase font-extrabold text-amber-400 tracking-wider block">
-                    CURRENT LEADING BID
-                  </span>
-                  <div className="flex items-baseline gap-3 mt-1 justify-center sm:justify-start">
-                    <span className="text-4xl sm:text-5xl font-black text-amber-300 font-mono tracking-tight text-glow-gold">
-                      ₹{currentBid.amount.toFixed(2)}
-                    </span>
-                    <span className="text-xl font-bold text-amber-400">Crore</span>
-                  </div>
-
-                  {leadingTeam ? (
-                    <div className="mt-3 flex items-center justify-center sm:justify-start gap-2">
-                      <span className="text-xs text-slate-300">Highest Bidder:</span>
-                      <div
-                        className="px-3 py-1 rounded-lg text-xs font-black text-black uppercase shadow flex items-center gap-2"
-                        style={{ backgroundColor: leadingTeam.primaryColor, color: leadingTeam.shortName === 'CSK' || leadingTeam.shortName === 'GT' ? '#000' : '#fff' }}
-                      >
-                        <img src={leadingTeam.logo} alt={leadingTeam.shortName} className="w-4 h-4 object-contain" />
-                        <span>{leadingTeam.name} ({leadingTeam.shortName})</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="mt-2 text-xs text-slate-400 italic">No bids placed yet. Opening base price: ₹{stagePlayer.basePrice} Cr</p>
-                  )}
-                </div>
-
+                <button
+                  onClick={handleUnsold}
+                  className="px-6 py-3.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-extrabold text-sm uppercase tracking-wider transition-all"
+                >
+                  UNSOLD
+                </button>
               </div>
 
             </div>
-
-            {/* Stage Action Buttons: SOLD / UNSOLD */}
-            <div className="mt-6 pt-6 border-t border-slate-800 flex flex-wrap sm:flex-nowrap gap-3">
-              <button
-                onClick={handleSell}
-                disabled={!currentBid.teamId}
-                className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-base uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 transition-all ${
-                  currentBid.teamId
-                    ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black hover:scale-[1.02] shadow-amber-500/25 active:scale-[0.98]'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                }`}
-              >
-                <Gavel className="w-5 h-5 -rotate-12" />
-                <span>SOLD (HAMMER DOWN)</span>
-              </button>
-
-              <button
-                onClick={handleUnsold}
-                className="px-6 py-3.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-extrabold text-sm uppercase tracking-wider transition-all"
-              >
-                UNSOLD
-              </button>
-            </div>
-
-          </div>
 
           {/* Rapid Bidding Control Panel */}
           <div className="stadium-card rounded-2xl p-6 space-y-4">
@@ -364,7 +268,6 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
                   Marquee Slot 2 (Cap ₹13Cr)
                 </button>
               </div>
-            </div>
 
             {/* Rapid Bid Increments */}
             <div className="space-y-2 pt-2">

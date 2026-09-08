@@ -4,6 +4,8 @@ import { IPL_TEAMS, REQUIRED_SQUAD_COMPOSITION, TOTAL_SQUAD_SIZE, CATEGORY_ROUND
 import { sound } from '../utils/soundFx';
 import confetti from 'canvas-confetti';
 
+import { syncAuctionStateToFirebase } from '../services/firebase';
+
 const AuctionContext = createContext();
 
 const LOCAL_STORAGE_KEY = 'IPL_AUCTION_ARENA_STATE_V3';
@@ -34,17 +36,25 @@ export const AuctionProvider = ({ children }) => {
   const savedState = loadInitialState();
 
   const [players, setPlayers] = useState(savedState?.players || initialPlayers);
-  const [teams, setTeams] = useState(
-    savedState?.teams ||
-      IPL_TEAMS.map((t) => ({
-        ...t,
-        remainingPurse: t.initialPurse,
-        roster: [],
-        marqueeSlot1: null, // { playerId, price } if used
-        marqueeSlot2: null, // { playerId, price } if used
-        marqueePicksCount: 0,
-      }))
-  );
+  const [teams, setTeams] = useState(() => {
+    if (savedState?.teams) {
+      return savedState.teams.map((st) => {
+        const match = IPL_TEAMS.find((t) => t.id === st.id);
+        return {
+          ...st,
+          logo: match ? match.logo : st.logo,
+        };
+      });
+    }
+    return IPL_TEAMS.map((t) => ({
+      ...t,
+      remainingPurse: t.initialPurse,
+      roster: [],
+      marqueeSlot1: null, // { playerId, price } if used
+      marqueeSlot2: null, // { playerId, price } if used
+      marqueePicksCount: 0,
+    }));
+  });
   const [bankAccountTotal, setBankAccountTotal] = useState(savedState?.bankAccountTotal || 0);
   const [transactions, setTransactions] = useState(savedState?.transactions || []);
   const [tagline, setTagline] = useState(
@@ -110,6 +120,14 @@ export const AuctionProvider = ({ children }) => {
       currentBid,
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
+    
+    // Sync live state to Firebase Realtime Database
+    syncAuctionStateToFirebase({
+      players,
+      teams,
+      stagePlayerId,
+      currentBid
+    });
   }, [
     players,
     teams,
