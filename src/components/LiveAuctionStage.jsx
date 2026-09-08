@@ -28,7 +28,7 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
 
   if (!stagePlayer) {
     return (
-      <div className="p-12 text-center stadium-card rounded-3xl border border-slate-800 space-y-4">
+      <div className="p-12 text-center stadium-card rounded-3xl border border-slate-800 space-y-4 max-w-2xl mx-auto my-12">
         <Trophy className="w-16 h-16 text-amber-400 mx-auto animate-bounce" />
         <h2 className="text-3xl font-black text-white uppercase font-display">Category Round Completed!</h2>
         <p className="text-slate-400 text-sm">All players in <strong>{currentRoundName}</strong> have been auctioned or marked unsold.</p>
@@ -161,7 +161,7 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
       {/* Main Live Stage Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left 7 Columns: Active Stage Player Slide */}
+        {/* Left 7 Columns: Active Stage Player Slide & Controls */}
         <div className="lg:col-span-7 space-y-6">
           <PlayerPresentationSlide 
             player={stagePlayer}
@@ -170,29 +170,27 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
           />
 
           {/* Stage Action Buttons: SOLD / UNSOLD */}
-              <div className="mt-6 pt-6 border-t border-slate-800 flex flex-wrap sm:flex-nowrap gap-3">
-                <button
-                  onClick={handleSell}
-                  disabled={!currentBid.teamId}
-                  className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-base uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 transition-all ${
-                    currentBid.teamId
-                      ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black hover:scale-[1.02] shadow-amber-500/25 active:scale-[0.98]'
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                  }`}
-                >
-                  <Gavel className="w-5 h-5 -rotate-12" />
-                  <span>SOLD (HAMMER DOWN)</span>
-                </button>
+          <div className="stadium-card rounded-2xl p-4 border border-slate-800 flex flex-wrap sm:flex-nowrap gap-3">
+            <button
+              onClick={handleSell}
+              disabled={!currentBid.teamId}
+              className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-base uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 transition-all ${
+                currentBid.teamId
+                  ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-black hover:scale-[1.02] shadow-amber-500/25 active:scale-[0.98]'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+              }`}
+            >
+              <Gavel className="w-5 h-5 -rotate-12" />
+              <span>SOLD (HAMMER DOWN)</span>
+            </button>
 
-                <button
-                  onClick={handleUnsold}
-                  className="px-6 py-3.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-extrabold text-sm uppercase tracking-wider transition-all"
-                >
-                  UNSOLD
-                </button>
-              </div>
-
-            </div>
+            <button
+              onClick={handleUnsold}
+              className="px-6 py-3.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-extrabold text-sm uppercase tracking-wider transition-all"
+            >
+              UNSOLD
+            </button>
+          </div>
 
           {/* Rapid Bidding Control Panel */}
           <div className="stadium-card rounded-2xl p-6 space-y-4">
@@ -233,7 +231,7 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
               <label className="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 fill-amber-400" /> Optional Marquee Slot Assignment (Team's Choice):
               </label>
-              <div className="grid grid-cols-3 gap-2 text-xs font-semibold">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-semibold">
                 <button
                   type="button"
                   onClick={() => setSelectedMarqueeSlot(null)}
@@ -268,6 +266,7 @@ export const LiveAuctionStage = ({ onSelectTeam }) => {
                   Marquee Slot 2 (Cap ₹13Cr)
                 </button>
               </div>
+            </div>
 
             {/* Rapid Bid Increments */}
             <div className="space-y-2 pt-2">

@@ -25,7 +25,10 @@ export const AuctionProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed?.players) && Array.isArray(parsed?.teams)) {
+          return parsed;
+        }
       }
     } catch (e) {
       console.error("Failed to load local storage state", e);
@@ -373,15 +376,236 @@ export const AuctionProvider = ({ children }) => {
     }
   };
 
-  // Recall an Unsold Player to the Auction Stage
+  // Direct Mark Player Sold (Quick Admin Action for any of the 193 players)
+  const markPlayerSoldDirect = (playerId, teamId, price, marqueeOption = null, overrideWarning = false) => {
+    const player = players.find((p) => p.id === playerId);
+    if (!player) return { success: false, message: "Player not found in database." };
+
+    if (player.status === 'Sold') {
+      return {
+        success: false,
+        message: `BLOCKED: ${player.name} has already been sold to ${player.soldTo}!`,
+      };
+    }
+
+    const team = teams.find((t) => t.id === teamId);
+    if (!team) return { success: false, message: "Please select a valid buying team." };
+
+    const finalPrice = parseFloat(price);
+    if (isNaN(finalPrice) || finalPrice <= 0) {
+      return { success: false, message: "Please enter a valid final sold price greater than 0." };
+    }
+
+    // 1. Squad size check (HARD BLOCK)
+    if (team.roster.length >= TOTAL_SQUAD_SIZE) {
+      return {
+        success: false,
+        message: `BLOCKED: ${team.name} (${team.shortName}) squad is full (15/15 players)!`,
+      };
+    }
+
+    // 2. Purse check (HARD BLOCK)
+    if (finalPrice > team.remainingPurse) {
+      return {
+        success: false,
+        message: `BLOCKED: Sold price (₹${finalPrice.toFixed(2)} Cr) exceeds ${team.shortName}'s remaining purse (₹${team.remainingPurse.toFixed(2)} Cr)!`,
+      };
+    }
+
+    // 3. Marquee Slot Validation
+    if (marqueeOption === 1) {
+      if (team.marqueeSlot1) {
+        return { success: false, message: `BLOCKED: ${team.shortName} has already used Marquee Slot 1!` };
+      }
+      if (finalPrice > 18.0 && !overrideWarning) {
+        return {
+          success: false,
+          isWarning: true,
+          message: `MARQUEE CAP WARNING: Marquee Slot 1 is capped at ₹18.0 Cr (${team.shortName} price: ₹${finalPrice.toFixed(2)} Cr). Click confirm again to override if this is a manual correction.`,
+        };
+      }
+    } else if (marqueeOption === 2) {
+      if (team.marqueeSlot2) {
+        return { success: false, message: `BLOCKED: ${team.shortName} has already used Marquee Slot 2!` };
+      }
+      if (finalPrice > 13.0 && !overrideWarning) {
+        return {
+          success: false,
+          isWarning: true,
+          message: `MARQUEE CAP WARNING: Marquee Slot 2 is capped at ₹13.0 Cr (${team.shortName} price: ₹${finalPrice.toFixed(2)} Cr). Click confirm again to override if this is a manual correction.`,
+        };
+      }
+    }
+
+    // UPDATE PLAYER STATE
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === playerId
+          ? {
+              ...p,
+              status: 'Sold',
+              soldTo: teamId,
+              soldPrice: finalPrice,
+              marqueeSlotUsed: marqueeOption,
+            }
+          : p
+      )
+    );
+
+    // UPDATE TEAM PURSE & ROSTER
+    setTeams((prev) =>
+      prev.map((t) => {
+        if (t.id === teamId) {
+          const updated = {
+            ...t,
+            remainingPurse: Number((t.remainingPurse - finalPrice).toFixed(2)),
+            roster: [...t.roster, playerId],
+          };
+          if (marqueeOption === 1) {
+            updated.marqueeSlot1 = { playerId, price: finalPrice };
+            updated.marqueePicksCount += 1;
+          } else if (marqueeOption === 2) {
+            updated.marqueeSlot2 = { playerId, price: finalPrice };
+            updated.marqueePicksCount += 1;
+          }
+          return updated;
+        }
+        return t;
+      })
+    );
+
+    // UPDATE BANK LEDGER
+    setBankAccountTotal((prev) => Number((prev + finalPrice).toFixed(2)));
+
+    // RECORD TRANSACTION LOG
+    const newTx = {
+      id: `TX-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString(),
+      playerId: player.id,
+      playerName: player.name,
+      playerRole: player.role,
+      originalTeam: player.originalTeam,
+      teamId,
+      teamName: team.name,
+      teamShort: team.shortName,
+      soldPrice: finalPrice,
+      marqueeOptionUsed: marqueeOption,
+      categoryRound: player.categoryRound || CATEGORY_ROUNDS[currentRoundIndex],
+    };
+
+    setTransactions((prev) => [newTx, ...prev]);
+
+    // AUDIO & CONFETTI
+    if (soundEnabled) {
+      sound.playGavel();
+      if (finalPrice >= 10.0 || marqueeOption) {
+        setTimeout(() => sound.playFanfare(), 300);
+      }
+    }
+
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    // Remove from active round queue if present
+    setRoundQueue((prev) => prev.filter((id) => id !== playerId));
+    if (stagePlayerId === playerId) {
+      advanceQueue();
+    }
+
+    return {
+      success: true,
+      message: `🔨 SOLD! ${player.name} to ${team.name} for ₹${finalPrice.toFixed(2)} Cr!`,
+    };
+  };
+
+  // UNDO A SPECIFIC TRANSACTION
+  const undoTransaction = (transactionId) => {
+    const tx = transactions.find((t) => t.id === transactionId);
+    if (!tx) return { success: false, message: "Transaction record not found." };
+
+    // 1. Revert Player Status
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === tx.playerId
+          ? {
+              ...p,
+              status: 'Available',
+              soldTo: undefined,
+              soldPrice: undefined,
+              marqueeSlotUsed: undefined,
+            }
+          : p
+      )
+    );
+
+    // 2. Revert Team Purse, Roster & Marquee Slots
+    setTeams((prev) =>
+      prev.map((t) => {
+        if (t.id === tx.teamId) {
+          const updatedRoster = t.roster.filter((id) => id !== tx.playerId);
+          const updated = {
+            ...t,
+            remainingPurse: Number((t.remainingPurse + tx.soldPrice).toFixed(2)),
+            roster: updatedRoster,
+          };
+
+          if (t.marqueeSlot1 && t.marqueeSlot1.playerId === tx.playerId) {
+            updated.marqueeSlot1 = null;
+            updated.marqueePicksCount = Math.max(0, updated.marqueePicksCount - 1);
+          }
+          if (t.marqueeSlot2 && t.marqueeSlot2.playerId === tx.playerId) {
+            updated.marqueeSlot2 = null;
+            updated.marqueePicksCount = Math.max(0, updated.marqueePicksCount - 1);
+          }
+          return updated;
+        }
+        return t;
+      })
+    );
+
+    // 3. Revert Bank Ledger Total
+    setBankAccountTotal((prev) => Number(Math.max(0, prev - tx.soldPrice).toFixed(2)));
+
+    // 4. Remove Transaction from Log
+    setTransactions((prev) => prev.filter((t) => t.id !== transactionId));
+
+    if (soundEnabled) {
+      sound.playUnsold();
+    }
+
+    return {
+      success: true,
+      message: `↩️ UNDONE! Sale of ${tx.playerName} to ${tx.teamShort} for ₹${tx.soldPrice.toFixed(2)} Cr has been reversed. Purse refunded.`,
+    };
+  };
+
+  // UNDO THE MOST RECENT SALE
+  const undoLastSale = () => {
+    if (transactions.length === 0) {
+      return { success: false, message: "No sales to undo." };
+    }
+    const lastTx = transactions[0];
+    return undoTransaction(lastTx.id);
+  };
+
+  // Recall an Unsold or Pool Player to the Auction Stage
   const recallPlayerToStage = (playerId) => {
     const p = players.find((pl) => pl.id === playerId);
     if (p) {
       setStagePlayerId(p.id);
       setCurrentBid({
-        amount: p.basePrice,
+        amount: p.basePrice || 2.0,
         teamId: null,
         marqueeOption: null,
+      });
+      setRoundQueue((prev) => {
+        if (!prev.includes(p.id)) {
+          return [p.id, ...prev];
+        }
+        return prev;
       });
     }
   };
@@ -433,6 +657,9 @@ export const AuctionProvider = ({ children }) => {
         setCurrentBid,
         placeBid,
         sellCurrentPlayer,
+        markPlayerSoldDirect,
+        undoTransaction,
+        undoLastSale,
         markCurrentUnsold,
         recallPlayerToStage,
         resetAuction,

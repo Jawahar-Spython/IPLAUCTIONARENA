@@ -122,28 +122,27 @@ export const PlayerCatalog = ({ onSendToStage }) => {
           return (
             <div
               key={p.id}
-              className={`stadium-card rounded-2xl p-4 border transition-all flex flex-col justify-between space-y-3 ${
+              className={`stadium-card rounded-2xl p-4 border transition-all flex flex-col justify-between space-y-3 min-h-[175px] ${
                 isSold ? 'border-slate-800 opacity-90' : 'border-amber-500/20 hover:border-amber-400 shadow-lg'
               }`}
             >
-              {/* Header: Photo + Name + Role */}
-              <div className="flex items-start gap-3 cursor-pointer" onClick={() => setSelectedPlayerModal(p)}>
-                <img
-                  src={p.photoUrl || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=500&auto=format&fit=crop&q=80"}
-                  alt={p.name}
-                  className="w-12 h-12 rounded-xl object-cover border border-slate-700 shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-amber-400 uppercase">
-                    <span>{p.role}</span>
+              {/* Header: Team Badge + Name + Role (Clean Text Layout - No Player Photos) */}
+              <div className="space-y-2 cursor-pointer" onClick={() => setSelectedPlayerModal(p)}>
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1.5 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    <img src={getTeamLogo(p.originalTeam)} alt={p.originalTeam} className="w-4 h-4 object-contain" />
+                    <span className="text-[10px] font-black uppercase text-amber-400">{p.originalTeam}</span>
                   </div>
-                  <h3 className="font-bold text-white text-sm truncate hover:text-amber-400 transition-colors">
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                    {p.nationality || 'India'}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-white text-base truncate hover:text-amber-400 transition-colors" title={p.name}>
                     {p.name}
                   </h3>
-                  <div className="flex items-center gap-1 text-slate-400 text-xs mt-0.5">
-                    <img src={getTeamLogo(p.originalTeam)} alt={p.originalTeam} className="w-3.5 h-3.5 object-contain" />
-                    <span>{p.originalTeam}</span>
-                  </div>
+                  <span className="text-xs font-semibold text-amber-400 block">{p.role}</span>
                 </div>
               </div>
 

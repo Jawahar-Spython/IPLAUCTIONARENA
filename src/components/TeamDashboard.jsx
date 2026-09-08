@@ -202,7 +202,7 @@ export const TeamDashboard = ({ selectedTeamId, setSelectedTeamId }) => {
               return (
                 <div
                   key={p.id}
-                  className="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-2.5 relative group hover:border-amber-400 transition-all shadow-lg flex flex-col justify-between"
+                  className="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-2.5 relative group hover:border-amber-400 transition-all shadow-lg flex flex-col justify-between min-h-[140px]"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-1">
@@ -234,7 +234,7 @@ export const TeamDashboard = ({ selectedTeamId, setSelectedTeamId }) => {
             return (
               <div
                 key={idx}
-                className="border-2 border-dashed border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-2 bg-slate-950/40 hover:border-slate-700 transition-all"
+                className="border-2 border-dashed border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-2 bg-slate-950/40 hover:border-slate-700 transition-all min-h-[140px]"
               >
                 <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
                   <User className="w-5 h-5" />

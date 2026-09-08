@@ -5,12 +5,12 @@ import { getTeamLogo } from '../data/teams';
 export function PlayerPresentationSlide({ player, teams, currentBid, isModal = false, onClose }) {
   if (!player) return null;
 
-  const buyingTeam = player.soldTo ? teams.find(t => t.id === player.soldTo || t.shortName === player.soldTo || t.name === player.soldTo) : null;
+  const buyingTeam = (player.soldTo && Array.isArray(teams)) ? teams.find(t => t.id === player.soldTo || t.shortName === player.soldTo || t.name === player.soldTo) : null;
   
   const biddingTeamId = currentBid?.teamId || player.currentBidder;
-  const biddingTeam = biddingTeamId ? teams.find(t => t.id === biddingTeamId || t.shortName === biddingTeamId || t.name === biddingTeamId) : null;
+  const biddingTeam = (biddingTeamId && Array.isArray(teams)) ? teams.find(t => t.id === biddingTeamId || t.shortName === biddingTeamId || t.name === biddingTeamId) : null;
 
-  const activeBidAmount = currentBid?.amount || player.currentBid || player.basePrice;
+  const activeBidAmount = typeof currentBid?.amount === 'number' ? currentBid.amount : (player.currentBid || player.basePrice || 0);
 
   const bowlingDisplay = (!player.bowlingStyle || player.bowlingStyle === 'N/A' || player.bowlingStyle === 'None') 
     ? 'Does not bowl' 
@@ -126,7 +126,7 @@ export function PlayerPresentationSlide({ player, teams, currentBid, isModal = f
             </div>
 
             <div className="text-3xl sm:text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 tracking-tight my-1">
-              HIGHEST BID: ₹{activeBidAmount.toFixed(2)} Cr
+              HIGHEST BID: ₹{Number(activeBidAmount || 0).toFixed(2)} Cr
             </div>
 
             {biddingTeam ? (
